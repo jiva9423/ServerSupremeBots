@@ -2,8 +2,10 @@
 import discord
 from discord.ext import commands
 from datetime import date
-from SharedFiles.firebase_db import get_wallet_bal, get_bank_bal, get_bank_space, add_bank_bal, sub_bank_bal, sub_wallet_bal, deposit_to_bank, withdraw_from_bank, add_wallet_bal
-import fb_tokens
+from SharedFiles.firebase_db import get_wallet_bal, get_bank_bal, get_bank_space, add_bank_bal\
+    , sub_bank_bal, sub_wallet_bal, deposit_to_bank, withdraw_from_bank, add_wallet_bal,\
+    get_item_from_inventory, remove_from_inventory, get_an_item
+import SharedFiles.fb_tokens as fb_tokens
 today = date.today()
 
 
@@ -122,7 +124,6 @@ class ClassName(commands.Cog):
 
         withdraw_from_bank(user_id, withdraw_amount)
 
-
     @commands.command(name="coolpersongib", hidden=True)
     async def admingive(self, context, user_id: int, amount: int, bank_or_wallet):
         admin_ids = [fb_tokens.get_go_id(), fb_tokens.get_j_id()]
@@ -138,6 +139,19 @@ class ClassName(commands.Cog):
                 sub_bank_bal(user_id, amount*-1)
             add_bank_bal(user_id, amount)
         await context.message.delete()
+
+    @commands.command(name="sell")
+    async def sell(self, context, item_id: str, number=1):
+        user_id = context.author.id
+        item = get_an_item(item_id)
+        if get_item_from_inventory(user_id, item_id) == -3:
+            await context.reply("You don't have that item, you doofus")
+            return
+        else:
+            money_earned = item["sell_price"] * number
+            remove_from_inventory(user_id, item_id, number)
+            add_wallet_bal(user_id, money_earned)
+            await context.reply(f"You sucessfully sold {number} {item_id} for 💰**{money_earned}**")
 
 
 # set it up

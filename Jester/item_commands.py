@@ -1,7 +1,7 @@
 import discord
 from discord.ext import commands
 import SharedFiles.firebase_db as firebase_db
-import fb_tokens
+import SharedFiles.fb_tokens as fb_tokens
 import asyncio
 
 
