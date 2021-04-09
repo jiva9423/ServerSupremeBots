@@ -1,6 +1,6 @@
 import pyrebase
 import time
-import fb_tokens
+import SharedFiles.fb_tokens as fb_tokens
 
 config = fb_tokens.get_config()
 email = fb_tokens.get_email()
