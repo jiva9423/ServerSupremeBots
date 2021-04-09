@@ -2,7 +2,7 @@ import discord
 from discord.ext import commands
 from discord.ext.commands import CommandOnCooldown, MissingRequiredArgument, ChannelNotFound, MemberNotFound, BucketType
 import random
-import fb_tokens
+import SharedFiles.fb_tokens as fb_tokens
 import asyncio
 
 users_on_cooldown = []
