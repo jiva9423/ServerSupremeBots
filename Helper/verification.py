@@ -2,7 +2,6 @@
 import discord
 from discord.ext import commands
 import SharedFiles.firebase_db as firebase_db
-from discord.ext.commands import BucketType
 from SharedFiles.firebase_db import add_xp
 import SharedFiles.fb_tokens as fb_tokens
 
