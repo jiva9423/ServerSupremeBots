@@ -102,7 +102,7 @@ async def add_item_helper(self, context):
         await context.reply("Is this item ok **(y, n)**:", embed=embed)
         is_item_ok = await self.client.wait_for("message", check=check, timeout=tout)  # 30 seconds to reply
 
-        if is_item_ok:
+        if is_item_ok.content == "y":
             added = firebase_db.add_item(item_id, item_name, description, emoji, int(buy_price), int(sell_price),
                                          item_type, item_rarity, overwrite)
             # return 1 if item added successfully with an item overwrite (item existed already and was replaced)

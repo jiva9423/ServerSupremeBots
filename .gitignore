@@ -1,2 +1,3 @@
 # Project exclude paths
 /venv/
+/Jester/fb_tokens.py
