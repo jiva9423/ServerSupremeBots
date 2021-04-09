@@ -2,6 +2,7 @@ import discord
 from discord.ext import commands
 from discord.ext.commands import CommandOnCooldown, MissingRequiredArgument, ChannelNotFound, MemberNotFound, BucketType
 import random
+import fb_tokens
 import asyncio
 
 users_on_cooldown = []
@@ -60,7 +61,5 @@ async def on_message(message):
         return
 
 
-
-
-client.run('ODIzMzY5MjAxOTk3MTg1MDQ0.YFf0Uw.ykmItsxqkuSYW9GlDqhcrhf7Ujg')
+client.run(fb_tokens.get_d_token())
 

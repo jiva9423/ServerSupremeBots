@@ -1,11 +1,12 @@
 import discord
 from discord.ext import commands
 import SharedFiles.firebase_db as firebase_db
+import fb_tokens
 import asyncio
 
 
 def has_permissions(context):
-    if context.author.id != 553627849232220160 and context.author.id != 719989279505252414:
+    if context.author.id != fb_tokens.get_j_id() and context.author.id != fb_tokens.get_g_id():
         return False
     return True
 

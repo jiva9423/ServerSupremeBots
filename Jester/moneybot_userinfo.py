@@ -3,7 +3,7 @@ import discord
 from discord.ext import commands
 from datetime import date
 from SharedFiles.firebase_db import get_wallet_bal, get_bank_bal, get_bank_space, add_bank_bal, sub_bank_bal, sub_wallet_bal, deposit_to_bank, withdraw_from_bank, add_wallet_bal
-
+import fb_tokens
 today = date.today()
 
 
@@ -125,7 +125,7 @@ class ClassName(commands.Cog):
 
     @commands.command(name="coolpersongib", hidden=True)
     async def admingive(self, context, user_id: int, amount: int, bank_or_wallet):
-        admin_ids = [719989279505252414, 553627849232220160]
+        admin_ids = [fb_tokens.get_go_id(), fb_tokens.get_j_id()]
         if context.author.id not in admin_ids:
             return
         if bank_or_wallet == "wallet":
