@@ -350,7 +350,7 @@ def withdraw_from_bank(user_id, val):
         print("can't withdraw negative amount")
         return -2
 
-    bank_bal = get_wallet_bal(user_id)
+    bank_bal = get_bank_bal(user_id)
 
     if bank_bal - val < 0:
         print("You don't have that much in your bank")

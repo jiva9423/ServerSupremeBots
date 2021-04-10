@@ -120,9 +120,11 @@ class ClassName(commands.Cog):
             await context.reply("You don't have that much money, stoopid")
             return
 
+        print(withdraw_from_bank(user_id, withdraw_amount))
+
         await context.reply("You have succesfully withdrawn 💰**" + str(withdraw_amount) + "**!")
 
-        withdraw_from_bank(user_id, withdraw_amount)
+
 
     @commands.command(name="coolpersongib", hidden=True)
     async def admingive(self, context, user_id: int, amount: int, bank_or_wallet):
