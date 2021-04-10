@@ -568,7 +568,7 @@ def get_item_from_inventory(user_id, item_id):
     if inv.get(item_id) is None:
         return 0
 
-    return inv.val().get(item_id)
+    return inv.get(item_id)
 
 
 # return 0 if item(s) added successfully
