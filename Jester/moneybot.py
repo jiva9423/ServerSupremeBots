@@ -12,7 +12,7 @@ cooldown_titles = ["Chillax my guy", "What's the hurry?", "Take a chill pill", "
 beg_description = ["Slow down on the begging you lowly BEGGAR", "Don't spam da beg"]
 
 
-client = commands.Bot(command_prefix="!")
+client = commands.Bot(command_prefix="!", case_insensitive=True)
 
 
 # put the name of all the files you want loaded in
