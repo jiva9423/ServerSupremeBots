@@ -3,6 +3,7 @@ from discord.ext import commands
 from discord.ext.commands import CommandOnCooldown, MissingRequiredArgument, ChannelNotFound, MemberNotFound, BucketType
 import random
 import SharedFiles.fb_tokens as fb_tokens
+import SharedFiles.firebase_db as firebase
 import asyncio
 
 users_on_cooldown = []
@@ -22,6 +23,13 @@ initial_extensions = ["moneybot_work", "moneybot_userinfo", "moneybot_gambling",
 if __name__ == '__main__':
     for extension in initial_extensions:
         client.load_extension(extension)
+
+
+@client.event
+async def on_ready():
+    firebase.init()
+    firebase.all_data = firebase.get_all_data()
+    #print(firebase.all_data)
 
 
 @client.event
