@@ -15,6 +15,10 @@ user = auth.refresh(user['refreshToken'])
 db = fb.database()  # get database
 
 
+def init():
+    global all_data
+    all_data = {}
+
 # before the 1 hour expiry: user = auth.refresh(user['refreshToken'])
 # db.child("users").push(data, user['idToken'])
 # db.child("users").child("members").set(data, user['idToken'])
@@ -34,6 +38,9 @@ def refresh_token():
 
 
 # ---------USER FUNCTIONS----------
+
+def get_all_data():
+    return db.get(user['idToken']).val()
 
 
 # adds a user to the b
@@ -60,6 +67,7 @@ def create_user(user_id, inviter_id):
         "inventory": {}
     }
 
+    all_data["users"][user_id] = user_data # added tp data dictionary
     db.child("users").child(user_id).set(user_data, user['idToken'])
     print("user created")
     return True
@@ -67,6 +75,7 @@ def create_user(user_id, inviter_id):
 
 # return true if user already exists in db and false if not
 def user_exists(user_id):
+    user_id = str(user_id)
     data = get_user_data(user_id)
     if data is None:
         print("User/Inviter", user_id, " does not exist in the database")
@@ -77,10 +86,12 @@ def user_exists(user_id):
 # returns the users data
 def get_user_data(user_id):
     refresh_token()
-    data = db.child("users").child(user_id).get(user['idToken'])
+    user_id = str(user_id)
+    data = all_data.get("users").get(user_id)  # added tp data dictionary
+    #data = db.child("users").child(user_id).get(user['idToken'])
     if data is None:
         return data
-    return data.val()
+    return data
 
 
 # --------FIEF FUNCTIONS-----------
@@ -90,7 +101,7 @@ def get_user_data(user_id):
 def join_fief(user_id, fief_id):
     # refreshes token if needed
     refresh_token()
-
+    user_id = str(user_id)
     # check if user exists in the db
     if not user_exists(user_id):
         create_user(user_id, 0)
@@ -107,6 +118,10 @@ def join_fief(user_id, fief_id):
         "fief_id": fief_id
     }
 
+    all_data["users"][user_id]["verified"] = True
+    all_data["users"][user_id]["user_id"] = user_id
+    all_data["users"][user_id]["fied_id"] = fief_id
+
     db.child("users").child(user_id).update(user_data, user['idToken'])
     print("joined fief")
 
@@ -116,22 +131,26 @@ def join_fief(user_id, fief_id):
 # check if user already assigned a fief
 def is_user_in_fief(user_id):
     refresh_token()
+    user_id = str(user_id)
     if not user_exists(user_id):
         return False
     # user will be set to active if in a fief
-    verified = db.child("users").child(user_id).child("verified").get(user['idToken'])
+    #verified = db.child("users").child(user_id).child("verified").get(user['idToken'])
+    verified = all_data.get("users").get(user_id).get("verified")
     if verified is None:
         return False
-    return verified.val()
+    return verified
 
 
 # gets a users fief id, returns -1 if not in fief
 def get_user_fief_id(user_id):
     refresh_token()
-    fief_id = db.child("users").child(user_id).child("fief_id").get(user['idToken'])
+    user_id = str(user_id)
+    # fief_id = db.child("users").child(user_id).child("fief_id").get(user['idToken'])
+    fief_id = all_data.get("users").get(user_id).get("fief_id")
     if fief_id is None:
         return -1
-    return fief_id.val()
+    return fief_id
 
 
 # ---------INVITE FUNCTIONS----------
@@ -140,16 +159,18 @@ def get_user_fief_id(user_id):
 # gets id of person who invited user
 def get_inviter_id(user_id):
     refresh_token()
-    inviter_id = db.child("users").child(user_id).child("inviter_id").get(user['idToken'])
-
+    user_id = str(user_id)
+    # inviter_id = db.child("users").child(user_id).child("inviter_id").get(user['idToken'])
+    inviter_id = all_data.get("users").get(user_id).get("inviter_id")
     if inviter_id is None:
         return -1
-    return inviter_id.val()
+    return inviter_id
 
 
 # increments user invites by 1
 def increment_num_invites(user_id):
     refresh_token()
+    user_id = str(user_id)
     # this person was not invited by anyone
     # (This should only happen to people in the server while the bot is being developed)
     if user_id == 0:
@@ -158,8 +179,10 @@ def increment_num_invites(user_id):
     if not user_exists(user_id):
         create_user(user_id, inviter_id=0)
         return False
-    num_of_invites = db.child("users").child(user_id).child("num_of_invites").get(user['idToken'])
-    db.child("users").child(user_id).update({"num_of_invites": int(num_of_invites.val()) + 1}, user['idToken'])
+    #num_of_invites = db.child("users").child(user_id).child("num_of_invites").get(user['idToken'])
+    num_of_invites = all_data.get("users").get(user_id).get("num_of_invites")
+    db.child("users").child(user_id).update({"num_of_invites": int(num_of_invites) + 1}, user['idToken'])
+    all_data["users"][user_id]["num_of_invites"] = int(num_of_invites) + 1
     return True
 
 
@@ -171,7 +194,7 @@ def increment_num_invites(user_id):
 # return -1 if user doesn't exist otherwise return val bal was set to
 def set_wallet_bal(user_id, val):
     refresh_token()
-
+    user_id = str(user_id)
     if not user_exists(user_id):
         return -1
 
@@ -179,6 +202,7 @@ def set_wallet_bal(user_id, val):
         val = 0
 
     db.child("users").child(user_id).update({"wallet_bal": val}, user['idToken'])
+    all_data["users"][user_id]["wallet_bal"] = val
     return val
 
 
@@ -187,17 +211,19 @@ def set_wallet_bal(user_id, val):
 # return -1 if user doesn't exist otherwise return bal.
 def add_wallet_bal(user_id, val):
     refresh_token()
-
+    user_id = str(user_id)
     if not user_exists(user_id):
         return -1
 
-    new_bal = db.child("users").child(user_id).child("wallet_bal").get(user['idToken'])
-    new_bal = int(new_bal.val()) + val
+    #new_bal = db.child("users").child(user_id).child("wallet_bal").get(user['idToken'])
+    new_bal = all_data["users"][user_id]["wallet_bal"]
+    new_bal = int(new_bal) + val
 
     if new_bal <= 0:
         new_bal = 0
 
     db.child("users").child(user_id).update({"wallet_bal": new_bal}, user['idToken'])
+    new_bal = all_data["users"][user_id]["wallet_bal"] = new_bal
     return new_bal
 
 
@@ -206,18 +232,19 @@ def add_wallet_bal(user_id, val):
 # return -1 if user doesn't exist otherwise return bal.
 def sub_wallet_bal(user_id, val):
     refresh_token()
-
+    user_id = str(user_id)
     if not user_exists(user_id):
         return -1
 
-    new_bal = db.child("users").child(user_id).child("wallet_bal").get(user['idToken'])
-    new_bal = int(new_bal.val()) - val
+    #new_bal = db.child("users").child(user_id).child("wallet_bal").get(user['idToken'])
+    new_bal = all_data["users"][user_id]["wallet_bal"]
+    new_bal = int(new_bal) - val
 
     if new_bal <= 0:
         new_bal = 0
 
     db.child("users").child(user_id).update({"wallet_bal": new_bal}, user['idToken'])
-
+    new_bal = all_data["users"][user_id]["wallet_bal"] = new_bal
     return new_bal
 
 
@@ -225,12 +252,13 @@ def sub_wallet_bal(user_id, val):
 # return -1 if user does not exist
 def get_wallet_bal(user_id):
     refresh_token()
-
+    user_id = str(user_id)
     if not user_exists(user_id):
         return -1
 
-    bal = db.child("users").child(user_id).child("wallet_bal").get(user['idToken'])
-    return int(bal.val())
+    # bal = db.child("users").child(user_id).child("wallet_bal").get(user['idToken'])
+    bal = all_data.get("users").get(user_id).get("wallet_bal")
+    return int(bal)
 
 
 # ----------BANK METHODS---------
@@ -240,12 +268,13 @@ def get_wallet_bal(user_id):
 # returns -1 if user does not exist
 def get_bank_bal(user_id):
     refresh_token()
-
+    user_id = str(user_id)
     if not user_exists(user_id):
         return -1
 
-    bal = db.child("users").child(user_id).child("bank_bal").get(user['idToken'])
-    return int(bal.val())
+    #bal = db.child("users").child(user_id).child("bank_bal").get(user['idToken'])
+    bal = all_data.get("users").get(user_id).get("bank_bal")
+    return int(bal)
 
 
 # sets a users balance (This will override bal to whatever you set the val to)
@@ -253,7 +282,7 @@ def get_bank_bal(user_id):
 # return -1 if user doesn't exist otherwise return val bal was set to
 def set_bank_bal(user_id, val):
     refresh_token()
-
+    user_id = str(user_id)
     if not user_exists(user_id):
         return -1
 
@@ -261,6 +290,7 @@ def set_bank_bal(user_id, val):
         val = 0
 
     db.child("users").child(user_id).update({"bank_bal": val}, user['idToken'])
+    all_data["users"][user_id]["bank_bal"] = val
     return val
 
 
@@ -269,17 +299,19 @@ def set_bank_bal(user_id, val):
 # return -1 if user doesn't exist otherwise return bal.
 def add_bank_bal(user_id, val):
     refresh_token()
-
+    user_id = str(user_id)
     if not user_exists(user_id):
         return -1
 
-    new_bal = db.child("users").child(user_id).child("bank_bal").get(user['idToken'])
-    new_bal = int(new_bal.val()) + val
+    #new_bal = db.child("users").child(user_id).child("bank_bal").get(user['idToken'])
+    new_bal = all_data.get("users").get(user_id).get("bank_bal")
+    new_bal = int(new_bal) + val
 
     if new_bal <= 0:
         new_bal = 0
 
     db.child("users").child(user_id).update({"bank_bal": new_bal}, user['idToken'])
+    all_data["users"][user_id]["bank_bal"] = new_bal
     return new_bal
 
 
@@ -288,18 +320,19 @@ def add_bank_bal(user_id, val):
 # return -1 if user doesn't exist otherwise return bal.
 def sub_bank_bal(user_id, val):
     refresh_token()
-
+    user_id = str(user_id)
     if not user_exists(user_id):
         return -1
 
-    new_bal = db.child("users").child(user_id).child("bank_bal").get(user['idToken'])
-    new_bal = int(new_bal.val()) - val
+    #new_bal = db.child("users").child(user_id).child("bank_bal").get(user['idToken'])
+    new_bal = all_data.get("users").get(user_id).get("bank_bal")
+    new_bal = int(new_bal) - val
 
     if new_bal <= 0:
         new_bal = 0
 
     db.child("users").child(user_id).update({"bank_bal": new_bal}, user['idToken'])
-
+    all_data["users"][user_id]["bank_bal"] = new_bal
     return new_bal
 
 
@@ -342,6 +375,7 @@ def deposit_to_bank(user_id, val):
 # return -3 if not enough money in bank
 def withdraw_from_bank(user_id, val):
     refresh_token()
+    user_id = str(user_id)
     if not user_exists(user_id):
         print("user doesn't exist")
         return -1
@@ -365,13 +399,14 @@ def withdraw_from_bank(user_id, val):
 # return bank space or -1 if user does not exist
 def get_bank_space(user_id):
     refresh_token()
-
+    user_id = str(user_id)
     if not user_exists(user_id):
         print("user doesn't exist")
         return -1
 
-    bank_space = db.child("users").child(user_id).child("bank_max_space").get(user['idToken'])
-    return bank_space.val()
+    # bank_space = db.child("users").child(user_id).child("bank_max_space").get(user['idToken'])
+    bank_space = all_data.get("users").get(user_id).get("bank_max_space")
+    return bank_space
 
 
 # -------------XP METHODS-----------------
@@ -381,36 +416,39 @@ def get_bank_space(user_id):
 # returns -1 if user does not exist
 def get_xp(user_id):
     refresh_token()
-
+    user_id = str(user_id)
     if not user_exists(user_id):
         return -1
 
-    xp = db.child("users").child(user_id).child("xp").get(user['idToken'])
-    return int(xp.val())
+    # xp = db.child("users").child(user_id).child("xp").get(user['idToken'])
+    xp = all_data.get("users").get(user_id).get("xp")
+    return int(xp)
 
 
 # get users level.
 # returns -1 if user does not exist
 def get_level(user_id):
     refresh_token()
-
+    user_id = str(user_id)
     if not user_exists(user_id):
         return -1
 
-    level = db.child("users").child(user_id).child("level").get(user['idToken'])
-    return int(level.val())
+    # level = db.child("users").child(user_id).child("level").get(user['idToken'])
+    level = all_data.get("users").get(user_id).get("level")
+    return int(level)
 
 
 # get max_xp for a user.
 # returns -1 if user does not exist
 def get_max_xp(user_id):
     refresh_token()
-
+    user_id = str(user_id)
     if not user_exists(user_id):
         return -1
 
-    max_xp = db.child("users").child(user_id).child("max_xp").get(user['idToken'])
-    return int(max_xp.val())
+    # max_xp = db.child("users").child(user_id).child("max_xp").get(user['idToken'])
+    max_xp = all_data.get("users").get(user_id).get("max_xp")
+    return int(max_xp)
 
 
 # set xp for a user, overrides current value.
@@ -419,7 +457,7 @@ def get_max_xp(user_id):
 # return -2 if val < 0
 def set_xp(user_id, val):
     refresh_token()
-
+    user_id = str(user_id)
     if not user_exists(user_id):
         return -1
 
@@ -427,6 +465,7 @@ def set_xp(user_id, val):
         return -2
 
     db.child("users").child(user_id).update({"xp": val}, user['idToken'])
+    all_data["users"][user_id]["xp"] = val
     return 0
 
 
@@ -436,7 +475,7 @@ def set_xp(user_id, val):
 # return -2 if val < 0
 def set_level(user_id, val):
     refresh_token()
-
+    user_id = str(user_id)
     if not user_exists(user_id):
         return -1
 
@@ -444,6 +483,7 @@ def set_level(user_id, val):
         return -2
 
     db.child("users").child(user_id).update({"level": val}, user['idToken'])
+    all_data["users"][user_id]["level"] = val
     return 0
 
 
@@ -453,7 +493,7 @@ def set_level(user_id, val):
 # return -2 if val < 0
 def set_max_xp(user_id, val):
     refresh_token()
-
+    user_id = str(user_id)
     if not user_exists(user_id):
         return -1
 
@@ -461,6 +501,7 @@ def set_max_xp(user_id, val):
         return -2
 
     db.child("users").child(user_id).update({"max_xp": val}, user['idToken'])
+    all_data["users"][user_id]["max_xp"] = val
     return 0
 
 
@@ -470,7 +511,7 @@ def set_max_xp(user_id, val):
 # return -2 if val < 0
 def add_xp(user_id, val):
     refresh_token()
-
+    user_id = str(user_id)
     if not user_exists(user_id):
         return -1
 
@@ -509,7 +550,7 @@ def add_xp(user_id, val):
 # return -1 if user does not exist
 def level_up(user_id):
     refresh_token()
-
+    user_id = str(user_id)
     if not user_exists(user_id):
         return -1
 
@@ -534,18 +575,17 @@ def level_up(user_id):
 # return -1 if user does not exist
 def get_inventory(user_id):
     refresh_token()
-
+    user_id = str(user_id)
     if not user_exists(user_id):
         return -1
 
-    inv = db.child("users").child(user_id).child("inventory").get(user['idToken'])
+    # inv = db.child("users").child(user_id).child("inventory").get(user['idToken'])
+    inv = all_data.get("users").get(user_id).get("inventory")
 
     if inv is None:
         return {}
-    elif inv.val() is None:
-        return {}
 
-    return inv.val()
+    return inv
 
 
 # return the amount of this item the user has
@@ -553,6 +593,7 @@ def get_inventory(user_id):
 # return -3 if item does not exist
 def get_item_from_inventory(user_id, item_id):
     refresh_token()
+    user_id = str(user_id)
     item_id = str(item_id).lower()
     if not user_exists(user_id):
         return -1
@@ -577,6 +618,7 @@ def get_item_from_inventory(user_id, item_id):
 # return -3 if item does not exist
 def add_to_inventory(user_id, item_id, num=1):
     refresh_token()
+    user_id = str(user_id)
     item_id = str(item_id).lower()
     if not user_exists(user_id):
         return -1
@@ -600,6 +642,7 @@ def add_to_inventory(user_id, item_id, num=1):
         inv[item_id] += num
 
     db.child("users").child(user_id).update({"inventory": inv}, user['idToken'])
+    all_data["users"][user_id]["inventory"] = inv
     return 0
 
 
@@ -611,6 +654,7 @@ def add_to_inventory(user_id, item_id, num=1):
 # return -5 if user is trying to remove more of the item than they have
 def remove_from_inventory(user_id, item_id, num=1):
     refresh_token()
+    user_id = str(user_id)
     item_id = str(item_id).lower()
     if not user_exists(user_id):
         return -1
@@ -638,6 +682,7 @@ def remove_from_inventory(user_id, item_id, num=1):
         inv[item_id] -= num
 
     db.child("users").child(user_id).update({"inventory": inv}, user['idToken'])
+    all_data["users"][user_id]["inventory"] = inv
     return 0
 
 
@@ -645,12 +690,12 @@ def remove_from_inventory(user_id, item_id, num=1):
 # return -1 if user does not exist
 def clear_inventory(user_id):
     refresh_token()
-
+    user_id = str(user_id)
     if not user_exists(user_id):
         return -1
 
     db.child("users").child(user_id).update({"inventory": {}}, user['idToken'])
-
+    all_data["users"][user_id]["inventory"] = {}
     return 0
 
 
@@ -660,14 +705,13 @@ def clear_inventory(user_id):
 # return all items that exists as a dictionary
 def get_items():
     refresh_token()
-    items = db.child("items").get(user['idToken'])
+    #items = db.child("items").get(user['idToken'])
+    items = all_data.get("items")
 
     if items is None:
         return {}
-    elif items.val() is None:
-        return {}
 
-    return items.val()
+    return items
 
 
 # return item data
@@ -739,6 +783,7 @@ def add_item(item_id, item_name, description, emoji, buy_price, sell_price, item
 
     # adds item.
     db.child("items").child(item_id).set(item, user['idToken'])
+    all_data["items"][item_id] = item
 
     if overwritten:
         print("The item with item id", item_id, "was overwritten.")
@@ -762,6 +807,7 @@ def remove_item(item_id):
     item = items.pop(item_id)
     remove_update_item_type(item.get("item_type"), item_id)
     db.child("items").set(items, user['idToken'])
+    all_data["items"] = items
     # remove from item type
     return 0
 
@@ -769,23 +815,21 @@ def remove_item(item_id):
 # returns all the item types as a dictionary
 def get_all_item_types():
     refresh_token()
-    types = db.child("item_types").get(user['idToken'])
+    # types = db.child("item_types").get(user['idToken'])
+    types = all_data.get("item_types")
     if types is None:
         return {}
-    elif types.val() is None:
-        return {}
 
-    return types.val()
+    return types
 
 
 def get_item_type(item_type):
     refresh_token()
-    types = db.child("item_types").child(item_type).get(user['idToken'])
+    # types = db.child("item_types").child(item_type).get(user['idToken'])
+    types = all_data.get("item_types").get(item_type)
     if types is None:
         return {}
-    elif types.val() is None:
-        return {}
-    return types.val()
+    return types
 
 
 def update_item_type(item_type, item_id):
@@ -794,6 +838,7 @@ def update_item_type(item_type, item_id):
     items_with_type = get_item_type(item_type)
     items_with_type[item_id] = 1
     db.child("item_types").update({item_type: items_with_type}, user['idToken'])
+    all_data["item_types"][item_type] = items_with_type
     return 0
 
 
@@ -803,6 +848,7 @@ def remove_update_item_type(item_type, item_id):
     items_with_type = get_item_type(item_type)
     items_with_type.pop(item_id)
     db.child("item_types").update({item_type: items_with_type}, user['idToken'])
+    all_data["item_types"][item_type] = items_with_type
     return 0
 
 
@@ -817,6 +863,7 @@ def add_item_type(item_type):
 
     types[item_type] = {"default":-1}
     db.child("item_types").set(types, user['idToken'])
+    all_data["item_types"] = types
     return 0
 
 
@@ -830,6 +877,7 @@ def remove_item_type(item_type):
 
     types.pop(item_type)
     db.child("item_types").set(types, user['idToken'])
+    all_data["item_types"] = types
     return 0
 
 
