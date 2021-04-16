@@ -590,8 +590,7 @@ def get_inventory(user_id):
             to_remove.append(key)
 
     for item in to_remove:
-        inv.remove(item)
-
+        inv.pop(item)
 
     return inv
 
