@@ -584,6 +584,14 @@ def get_inventory(user_id):
 
     if inv is None:
         return {}
+    to_remove = []
+    for key in inv:
+        if inv[key] == 0:
+            to_remove.append(key)
+
+    for item in to_remove:
+        inv.remove(item)
+
 
     return inv
 
