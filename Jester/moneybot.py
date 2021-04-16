@@ -29,6 +29,7 @@ if __name__ == '__main__':
 async def on_ready():
     firebase.init()
     firebase.all_data = firebase.get_all_data()
+    print("reeady")
     #print(firebase.all_data)
 
 

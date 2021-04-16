@@ -29,6 +29,9 @@ def init():
 def refresh_token():
     global user
     global time_when_refresh
+    global all_data
+    if all_data is None:
+        all_data = get_all_data()
     auth.refresh(user['refreshToken'])
     # refreshes token if needed
     #if time.time() > time_when_refresh:
@@ -45,6 +48,7 @@ def get_all_data():
 
 # adds a user to the b
 def create_user(user_id, inviter_id):
+    global all_data
     # refreshes token if needed
     refresh_token()
     # check if user already created an verified. If so return false
@@ -75,6 +79,7 @@ def create_user(user_id, inviter_id):
 
 # return true if user already exists in db and false if not
 def user_exists(user_id):
+    global all_data
     user_id = str(user_id)
     data = get_user_data(user_id)
     if data is None:
@@ -85,6 +90,7 @@ def user_exists(user_id):
 
 # returns the users data
 def get_user_data(user_id):
+    global all_data
     refresh_token()
     user_id = str(user_id)
     data = all_data.get("users").get(user_id)  # added tp data dictionary
@@ -99,6 +105,7 @@ def get_user_data(user_id):
 
 # adds a user to a fief
 def join_fief(user_id, fief_id):
+    global all_data
     # refreshes token if needed
     refresh_token()
     user_id = str(user_id)
@@ -130,6 +137,7 @@ def join_fief(user_id, fief_id):
 
 # check if user already assigned a fief
 def is_user_in_fief(user_id):
+    global all_data
     refresh_token()
     user_id = str(user_id)
     if not user_exists(user_id):
@@ -144,6 +152,7 @@ def is_user_in_fief(user_id):
 
 # gets a users fief id, returns -1 if not in fief
 def get_user_fief_id(user_id):
+    global all_data
     refresh_token()
     user_id = str(user_id)
     # fief_id = db.child("users").child(user_id).child("fief_id").get(user['idToken'])
@@ -158,6 +167,7 @@ def get_user_fief_id(user_id):
 
 # gets id of person who invited user
 def get_inviter_id(user_id):
+    global all_data
     refresh_token()
     user_id = str(user_id)
     # inviter_id = db.child("users").child(user_id).child("inviter_id").get(user['idToken'])
@@ -169,6 +179,7 @@ def get_inviter_id(user_id):
 
 # increments user invites by 1
 def increment_num_invites(user_id):
+    global all_data
     refresh_token()
     user_id = str(user_id)
     # this person was not invited by anyone
@@ -193,6 +204,7 @@ def increment_num_invites(user_id):
 # if val < 0 then val set to 0
 # return -1 if user doesn't exist otherwise return val bal was set to
 def set_wallet_bal(user_id, val):
+    global all_data
     refresh_token()
     user_id = str(user_id)
     if not user_exists(user_id):
@@ -210,6 +222,7 @@ def set_wallet_bal(user_id, val):
 # if new_bal < 0 then bal set to 0
 # return -1 if user doesn't exist otherwise return bal.
 def add_wallet_bal(user_id, val):
+    global all_data
     refresh_token()
     user_id = str(user_id)
     if not user_exists(user_id):
@@ -231,6 +244,7 @@ def add_wallet_bal(user_id, val):
 # if new_bal < 0 then bal set to 0
 # return -1 if user doesn't exist otherwise return bal.
 def sub_wallet_bal(user_id, val):
+    global all_data
     refresh_token()
     user_id = str(user_id)
     if not user_exists(user_id):
@@ -251,6 +265,7 @@ def sub_wallet_bal(user_id, val):
 # gets current user bal
 # return -1 if user does not exist
 def get_wallet_bal(user_id):
+    global all_data
     refresh_token()
     user_id = str(user_id)
     if not user_exists(user_id):
@@ -267,6 +282,7 @@ def get_wallet_bal(user_id):
 # get bank balance.
 # returns -1 if user does not exist
 def get_bank_bal(user_id):
+    global all_data
     refresh_token()
     user_id = str(user_id)
     if not user_exists(user_id):
@@ -281,6 +297,7 @@ def get_bank_bal(user_id):
 # if val < 0 then val set to 0
 # return -1 if user doesn't exist otherwise return val bal was set to
 def set_bank_bal(user_id, val):
+    global all_data
     refresh_token()
     user_id = str(user_id)
     if not user_exists(user_id):
@@ -298,6 +315,7 @@ def set_bank_bal(user_id, val):
 # if new_bal < 0 then bal set to 0
 # return -1 if user doesn't exist otherwise return bal.
 def add_bank_bal(user_id, val):
+    global all_data
     refresh_token()
     user_id = str(user_id)
     if not user_exists(user_id):
@@ -319,6 +337,7 @@ def add_bank_bal(user_id, val):
 # if new_bal < 0 then bal set to 0
 # return -1 if user doesn't exist otherwise return bal.
 def sub_bank_bal(user_id, val):
+    global all_data
     refresh_token()
     user_id = str(user_id)
     if not user_exists(user_id):
@@ -342,6 +361,7 @@ def sub_bank_bal(user_id, val):
 # return -3 if not enough money in wallet
 # return -4 if not enough space in bank
 def deposit_to_bank(user_id, val):
+    global all_data
     refresh_token()
     if not user_exists(user_id):
         print("user doesn't exist")
@@ -374,6 +394,7 @@ def deposit_to_bank(user_id, val):
 # return -2 if val < 0
 # return -3 if not enough money in bank
 def withdraw_from_bank(user_id, val):
+    global all_data
     refresh_token()
     user_id = str(user_id)
     if not user_exists(user_id):
@@ -396,8 +417,10 @@ def withdraw_from_bank(user_id, val):
     return 0
 
 
-# return bank space or -1 if user does not exist
+# return bank space
+# -1 if user does not exist
 def get_bank_space(user_id):
+    global all_data
     refresh_token()
     user_id = str(user_id)
     if not user_exists(user_id):
@@ -415,6 +438,7 @@ def get_bank_space(user_id):
 # get users xp.
 # returns -1 if user does not exist
 def get_xp(user_id):
+    global all_data
     refresh_token()
     user_id = str(user_id)
     if not user_exists(user_id):
@@ -428,6 +452,7 @@ def get_xp(user_id):
 # get users level.
 # returns -1 if user does not exist
 def get_level(user_id):
+    global all_data
     refresh_token()
     user_id = str(user_id)
     if not user_exists(user_id):
@@ -441,6 +466,7 @@ def get_level(user_id):
 # get max_xp for a user.
 # returns -1 if user does not exist
 def get_max_xp(user_id):
+    global all_data
     refresh_token()
     user_id = str(user_id)
     if not user_exists(user_id):
@@ -456,6 +482,7 @@ def get_max_xp(user_id):
 # return -1 if user does not exist
 # return -2 if val < 0
 def set_xp(user_id, val):
+    global all_data
     refresh_token()
     user_id = str(user_id)
     if not user_exists(user_id):
@@ -474,6 +501,7 @@ def set_xp(user_id, val):
 # returns -1 if user does not exist
 # return -2 if val < 0
 def set_level(user_id, val):
+    global all_data
     refresh_token()
     user_id = str(user_id)
     if not user_exists(user_id):
@@ -492,6 +520,7 @@ def set_level(user_id, val):
 # returns -1 if user does not exist
 # return -2 if val < 0
 def set_max_xp(user_id, val):
+    global all_data
     refresh_token()
     user_id = str(user_id)
     if not user_exists(user_id):
@@ -510,6 +539,7 @@ def set_max_xp(user_id, val):
 # return -1 if user does not exist
 # return -2 if val < 0
 def add_xp(user_id, val):
+    global all_data
     refresh_token()
     user_id = str(user_id)
     if not user_exists(user_id):
@@ -549,6 +579,7 @@ def add_xp(user_id, val):
 # return 0 if successfully leveled up
 # return -1 if user does not exist
 def level_up(user_id):
+    global all_data
     refresh_token()
     user_id = str(user_id)
     if not user_exists(user_id):
@@ -574,6 +605,7 @@ def level_up(user_id):
 # return inventory as a dictionary
 # return -1 if user does not exist
 def get_inventory(user_id):
+    global all_data
     refresh_token()
     user_id = str(user_id)
     if not user_exists(user_id):
@@ -599,6 +631,7 @@ def get_inventory(user_id):
 # return -1 if user does not exist
 # return -3 if item does not exist
 def get_item_from_inventory(user_id, item_id):
+    global all_data
     refresh_token()
     user_id = str(user_id)
     item_id = str(item_id).lower()
@@ -624,6 +657,7 @@ def get_item_from_inventory(user_id, item_id):
 # return -2 if num < 0
 # return -3 if item does not exist
 def add_to_inventory(user_id, item_id, num=1):
+    global all_data
     refresh_token()
     user_id = str(user_id)
     item_id = str(item_id).lower()
@@ -660,6 +694,7 @@ def add_to_inventory(user_id, item_id, num=1):
 # return -4 if user does not have this item
 # return -5 if user is trying to remove more of the item than they have
 def remove_from_inventory(user_id, item_id, num=1):
+    global all_data
     refresh_token()
     user_id = str(user_id)
     item_id = str(item_id).lower()
@@ -696,6 +731,7 @@ def remove_from_inventory(user_id, item_id, num=1):
 # return 0 if inventory successfully cleared
 # return -1 if user does not exist
 def clear_inventory(user_id):
+    global all_data
     refresh_token()
     user_id = str(user_id)
     if not user_exists(user_id):
@@ -711,6 +747,7 @@ def clear_inventory(user_id):
 
 # return all items that exists as a dictionary
 def get_items():
+    global all_data
     refresh_token()
     #items = db.child("items").get(user['idToken'])
     items = all_data.get("items")
@@ -724,6 +761,7 @@ def get_items():
 # return item data
 # return None if item does not exist
 def get_an_item(item_id):
+    global all_data
     refresh_token()
     items = get_items()
     item_id = str(item_id).lower()
@@ -747,6 +785,7 @@ def get_an_item(item_id):
 # return -1 if trying to overwrite an item when overwrite is set to False
 # return -2 if invalid types were included in the item_types list
 def add_item(item_id, item_name, description, emoji, buy_price, sell_price, item_type, item_rarity=1, overwrite=False):
+    global all_data
     refresh_token()
     items = get_items()
     overwritten = False
@@ -806,6 +845,7 @@ def add_item(item_id, item_name, description, emoji, buy_price, sell_price, item
 # return 0 if item successfully removed
 # return -1 if item does not exist in database
 def remove_item(item_id):
+    global all_data
     refresh_token()
     items = get_items()
     item_id = str(item_id).lower()
@@ -821,6 +861,7 @@ def remove_item(item_id):
 
 # returns all the item types as a dictionary
 def get_all_item_types():
+    global all_data
     refresh_token()
     # types = db.child("item_types").get(user['idToken'])
     types = all_data.get("item_types")
@@ -831,6 +872,7 @@ def get_all_item_types():
 
 
 def get_item_type(item_type):
+    global all_data
     refresh_token()
     # types = db.child("item_types").child(item_type).get(user['idToken'])
     types = all_data.get("item_types").get(item_type)
@@ -840,6 +882,7 @@ def get_item_type(item_type):
 
 
 def update_item_type(item_type, item_id):
+    global all_data
     refresh_token()
     # add to item type
     items_with_type = get_item_type(item_type)
@@ -850,6 +893,7 @@ def update_item_type(item_type, item_id):
 
 
 def remove_update_item_type(item_type, item_id):
+    global all_data
     refresh_token()
     # add to item type
     items_with_type = get_item_type(item_type)
@@ -862,6 +906,7 @@ def remove_update_item_type(item_type, item_id):
 # return 0 if new item type was added to database
 # return -1 if item type already exists
 def add_item_type(item_type):
+    global all_data
     refresh_token()
     types = get_all_item_types()
 
@@ -877,6 +922,7 @@ def add_item_type(item_type):
 # return 0 if successfully removed item type from database
 # return -1 if item type does not exist
 def remove_item_type(item_type):
+    global all_data
     refresh_token()
     types = get_all_item_types()
     if types.get(item_type) is None:
@@ -888,11 +934,11 @@ def remove_item_type(item_type):
     return 0
 
 
-#--------------FIEF FUNCTIONS---------------
+# --------------FIEF FUNCTIONS---------------
 
 
 def create_fief_data(fief_name):
-
+    global all_data
     fief_name = str(fief_name).lower()
     # create our user in the database
     fief_data = {
@@ -913,11 +959,179 @@ def create_fief_data(fief_name):
     db.child("fiefs").child(fief_name).set(fief_data, user['idToken'])
 
 
+def fief_exists(fief_name):
+    global all_data
+    refresh_token()
+    data = all_data.get(fief_name)
+    if data is None:
+        return False
+    return True
+
+
+# return fief data.
 # if fief data doesn't exist for that fief it returns None.
 def get_fief_data(fief_name):
+    global all_data
+    refresh_token()
     data = all_data.get("fiefs",{})
     fief_data = data.get(fief_name)
     return fief_data
+
+
+# return 1 if leveled up after adding xp
+# return 0 if xp added successfully but no level up
+# return -1 if fief does not exist
+# return -2 if val < 0
+def add_fief_xp(fief_name, val):
+    global all_data
+    refresh_token()
+    fief_id = str(fief_name)
+    if not fief_exists(fief_id):
+        return -1
+
+    if val < 0:
+        return -2
+
+    leveled_up = False
+    # add all the exp
+    while val > 0:
+        max_xp = get_fief_max_xp(fief_id)
+        current_xp = get_fief_xp(fief_id)
+
+        # check if we need to level up
+        if current_xp + val >= max_xp:
+            leveled_up = True
+            # see how much xp was used for leveling
+            xp_used = max_xp - current_xp
+            # subtract what was used from the xp we received
+            val -= xp_used
+            # level  up
+            level_up_fief(fief_id)
+        else:
+            current_xp += val
+            # set users current xp
+            set_fief_xp(fief_id, current_xp)
+            val = 0
+
+    # check if we leveled up
+    if leveled_up:
+        return 1
+
+    return 0
+
+
+# get fief xp
+# return -1 if fief doesnt exist.
+def get_fief_xp(fief_name):
+    global all_data
+    data = get_fief_data(fief_name)
+    if data is None:
+        return -1
+
+    return data.get("xp")
+
+
+# get max fief xp
+# return -1 if fief doesnt exist.
+def get_fief_max_xp(fief_name):
+    global all_data
+    data = get_fief_data(fief_name)
+    if data is None:
+        return -1
+    return data.get("max_xp")
+
+
+# get fief level
+# return -1 if fief doesnt exist.
+def get_fief_level(fief_name):
+    global all_data
+    data = get_fief_data(fief_name)
+    if data is None:
+        return -1
+    return data.get("level")
+
+
+# set fief xp
+# return 0 if successful
+# return -1 if fief does not exist
+# return -2 if val < 0
+def set_fief_xp(fief_name, val):
+    global all_data
+    refresh_token()
+    fief_id = str(fief_name)
+    if not user_exists(fief_id):
+        return -1
+
+    if val < 0:
+        return -2
+
+    db.child("fiefs").child(fief_id).update({"xp": val}, user['idToken'])
+    all_data["fiefs"][fief_id]["xp"] = val
+    return 0
+
+
+# set fief xp
+# return 0 if successful
+# return -1 if fief does not exist
+# return -2 if val < 0
+def set_fief_max_xp(fief_name, val):
+    global all_data
+    refresh_token()
+    fief_id = str(fief_name)
+    if not user_exists(fief_id):
+        return -1
+
+    if val < 0:
+        return -2
+
+    db.child("fiefs").child(fief_id).update({"max_xp": val}, user['idToken'])
+    all_data["fiefs"][fief_id]["max_xp"] = val
+    return 0
+
+
+# set fief xp
+# return 0 if successful
+# return -1 if fief does not exist
+# return -2 if val < 0
+def set_fief_level(fief_name, val):
+    global all_data
+    refresh_token()
+    fief_id = str(fief_name)
+    if not user_exists(fief_id):
+        return -1
+
+    if val < 0:
+        return -2
+
+    db.child("fiefs").child(fief_id).update({"level": val}, user['idToken'])
+    all_data["fiefs"][fief_id]["level"] = val
+    return 0
+
+
+# set fief xp
+# return 0 if successful
+# return -1 if fief does not exist
+# return -2 if val < 0
+def level_up_fief(fief_name):
+    global all_data
+    refresh_token()
+    fief_id = str(fief_name)
+    if not user_exists(fief_id):
+        return -1
+
+    # increase level by one
+    level = get_fief_level(fief_id)
+    set_level(fief_id, level + 1)
+
+    # increase max_xp user needs to get
+    max_xp = get_fief_max_xp(fief_id)
+    set_fief_max_xp(fief_id, int(max_xp * 1.25))
+    set_fief_xp(fief_id, 0)
+
+    # increase bank bal
+
+    # increase other stats
+    return 0
 
 
 
