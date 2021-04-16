@@ -94,7 +94,7 @@ def get_user_data(user_id):
     return data
 
 
-# --------FIEF FUNCTIONS-----------
+# --------FIEF USER FUNCTIONS-----------
 
 
 # adds a user to a fief
@@ -886,6 +886,39 @@ def remove_item_type(item_type):
     db.child("item_types").set(types, user['idToken'])
     all_data["item_types"] = types
     return 0
+
+
+#--------------FIEF FUNCTIONS---------------
+
+
+def create_fief_data(fief_name):
+
+    fief_name = str(fief_name).lower()
+    # create our user in the database
+    fief_data = {
+        "bank_bal": 0,
+        "bank_max_space": 100,
+        "num_of_invites": 0,
+        "level": 1,
+        "xp": 0,
+        "max_xp": 100,
+        "vault": {},
+        "members": {},
+        "tax_rate":15,
+        "multiplier": 1,
+        "number_of_wins": 1
+    }
+
+    all_data["fiefs"][fief_name] = fief_data  # added tp data dictionary
+    db.child("fiefs").child(fief_name).set(fief_data, user['idToken'])
+
+
+# if fief data doesn't exist for that fief it returns None.
+def get_fief_data(fief_name):
+    data = all_data.get("fiefs",{})
+    fief_data = data.get(fief_name)
+    return fief_data
+
 
 
 
