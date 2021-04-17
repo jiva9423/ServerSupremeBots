@@ -758,6 +758,19 @@ def get_items():
     return items
 
 
+def get_items_by_type(type_name):
+    global all_data
+    refresh_token()
+    # items = db.child("items").get(user['idToken'])
+    item_types = all_data.get("item_types",{})
+    items = item_types.get(type_name)
+
+    if items is None:
+        return {}
+
+    return items
+
+
 # return item data
 # return None if item does not exist
 def get_an_item(item_id):
@@ -1051,6 +1064,22 @@ def get_fief_level(fief_name):
     return data.get("level")
 
 
+def get_fief_bank(fief_name):
+    global all_data
+    data = get_fief_data(fief_name)
+    if data is None:
+        return -1
+    return data.get("bank_bal")
+
+
+def get_fief_bank_space(fief_name):
+    global all_data
+    data = get_fief_data(fief_name)
+    if data is None:
+        return -1
+    return data.get("bank_max_space")
+
+
 # set fief xp
 # return 0 if successful
 # return -1 if fief does not exist
@@ -1086,6 +1115,36 @@ def set_fief_max_xp(fief_name, val):
 
     db.child("fiefs").child(fief_id).update({"max_xp": val}, user['idToken'])
     all_data["fiefs"][fief_id]["max_xp"] = val
+    return 0
+
+
+def set_fief_bank_space(fief_name, val):
+    global all_data
+    refresh_token()
+    fief_id = str(fief_name)
+    if not user_exists(fief_id):
+        return -1
+
+    if val < 0:
+        return -2
+
+    db.child("fiefs").child(fief_id).update({"bank_space": val}, user['idToken'])
+    all_data["fiefs"][fief_id]["bank_space"] = val
+    return 0
+
+
+def set_fief_bank_bal(fief_name, val):
+    global all_data
+    refresh_token()
+    fief_id = str(fief_name)
+    if not user_exists(fief_id):
+        return -1
+
+    if val < 0:
+        return -2
+
+    db.child("fiefs").child(fief_id).update({"bank_bal": val}, user['idToken'])
+    all_data["fiefs"][fief_id]["bank_bal"] = val
     return 0
 
 
@@ -1129,9 +1188,15 @@ def level_up_fief(fief_name):
     set_fief_xp(fief_id, 0)
 
     # increase bank bal
+    bank_space = int(get_fief_bank_space(fief_name)) * 1.25
+    set_fief_bank_space(fief_name, bank_space)
+
+
+    # increase vault size
 
     # increase other stats
     return 0
+
 
 
 
