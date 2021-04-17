@@ -3,13 +3,15 @@ import discord
 from discord.ext import commands
 from discord.ext.commands import BucketType
 import random
-from SharedFiles.firebase_db import add_wallet_bal, add_to_inventory, get_an_item
+from SharedFiles.firebase_db import add_wallet_bal, add_to_inventory, get_an_item, get_items_by_type
 
 random_people = ["Random Stranger", "Your mom", "Your dad", "The King", "The Baron", "A Knight in Shining Armor", "Marco Polo", "That one dude", "Genghis Khan", "King Arthur", "Vlad the Impaler", "Leonardo DaVinci", "Some guy from the future", "Baker", "A horse", "Your mom's bf", "John", "John Cena", "A wild pokemon!", "That guy on the wanted posters", "Mr. Beast", "John", "Bob", "Bobalina", "Margaret"]
 no_money_responses = ['Haha imagine begging', 'My mommy told me not to give money to strangers!', '*stares at you awkwardly*', 'Here you can have this: *nothing*.', 'Haha. No', 'Go away filthy beggar', 'Begone THOT', 'No', 'ew no', 'GET OUT OF MY SIGHT YOU FILTHY BEGGAR', 'go ask someone ELSE', 'you forgot to say please :p', 'I am NOT A Charity']
 money_responses = ['Wow being poor must suck, here take this', 'Here, take some spare change', 'You poor, poor, beggar', 'Oh, I was just looking for someone to give free money to!', 'Take dis mula!', 'Haha I am rich, take this money.', 'Only because you asked nicely :D', 'Sharing is caring!', 'You are very welcome!', 'Idk why I am giving this to you tbh', 'Sure, why not?', 'Fine whatever, just stop bugging me.', 'Sure!']
 no_hunt_responses = ['You absolutely **suck** at hunting; No animals for you', 'You go into the forest and somehow manage to catch *nothing* 🤣', "You are trash at hunting tbh. Nothing for you 😂"]
 hunt_responses = ["You go into the forest and hunt a ", "You somehow manage to catch ", "Wow, it looks like you're not too bad at hunting. *You got a* "]
+
+
 
 
 # create a class with what ever name you want.
@@ -58,13 +60,17 @@ class ClassName(commands.Cog):
     @commands.command(name="hunt")
     async def hunt(self, context):
         rand = random.randint(1, 100)
+
+        # counts as a successful hunt
         if rand < 70:
+
+            hunted = get_rarest_item(self, rand, "hunting")
+
             response = random.choice(hunt_responses)
-            hunted = random.choice(['duck', 'boar'])
             random_addition = random.choice([' *wtf?*', " 😲", ' *all luck no skill, noob*', ' 😱'])
-            add_to_inventory(context.author.id, hunted)
+            add_to_inventory(context.author.id, hunted.get("item_id"))
             item = get_an_item(hunted)
-            await context.send(response + item["emoji"] + ' ' + hunted + ' ' + random_addition)
+            await context.send(response + hunted.get("emoji") + ' ' + hunted.get("item_name") + ' ' + random_addition)
 
         else:
             response = random.choice(no_hunt_responses)
