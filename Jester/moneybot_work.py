@@ -54,10 +54,11 @@ class ClassName(commands.Cog):
         add_wallet_bal(user_id, amount)
 
 
+
     @commands.command(name="hunt")
     async def hunt(self, context):
         rand = random.randint(1, 100)
-        if rand > 70:
+        if rand < 70:
             response = random.choice(hunt_responses)
             hunted = random.choice(['duck', 'boar'])
             random_addition = random.choice([' *wtf?*', " 😲", ' *all luck no skill, noob*', ' 😱'])

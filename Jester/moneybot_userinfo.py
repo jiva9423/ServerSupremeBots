@@ -143,8 +143,16 @@ class ClassName(commands.Cog):
         await context.message.delete()
 
     @commands.command(name="sell")
-    async def sell(self, context, item_id: str, number=1):
+    async def sell(self, context, item_id: str, number='1'):
+
         user_id = context.author.id
+
+        if number == "all":
+
+            number = get_item_from_inventory(user_id, item_id)
+
+        int(number)
+
         item = get_an_item(item_id)
         if get_item_from_inventory(user_id, item_id) == -3:
             await context.reply("You don't have that item, you doofus")

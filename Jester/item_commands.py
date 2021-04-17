@@ -6,7 +6,7 @@ import asyncio
 
 
 def has_permissions(context):
-    if context.author.id != fb_tokens.get_j_id() and context.author.id != fb_tokens.get_g_id():
+    if context.author.id != fb_tokens.get_j_id() and context.author.id != fb_tokens.get_go_id():
         return False
     return True
 
