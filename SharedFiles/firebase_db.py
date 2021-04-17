@@ -767,6 +767,7 @@ def get_items_by_type(type_name):
 
     if items is None:
         return {}
+    items.pop("default")
 
     return items
 
