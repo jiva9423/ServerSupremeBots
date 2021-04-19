@@ -782,8 +782,7 @@ def get_rarest_item(max_rarity: int, *item_types):
     for item_type in item_types:
         items_dict = get_items_by_type(item_type)
         item_list = list(items_dict.keys())
-        for item in item_list:
-            all_items.append(item)
+        all_items += item_list
 
     for item_id in all_items:
         item = get_an_item(item_id)
