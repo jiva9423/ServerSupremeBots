@@ -4,7 +4,7 @@ from discord.ext import commands
 from datetime import date
 from SharedFiles.firebase_db import get_wallet_bal, get_bank_bal, get_bank_space, add_bank_bal\
     , sub_bank_bal, sub_wallet_bal, deposit_to_bank, withdraw_from_bank, add_wallet_bal,\
-    get_item_from_inventory, remove_from_inventory, get_an_item
+    get_item_from_inventory, remove_from_inventory, get_an_item, add_to_inventory
 import SharedFiles.fb_tokens as fb_tokens
 today = date.today()
 
@@ -120,10 +120,7 @@ class ClassName(commands.Cog):
             await context.reply("You don't have that much money, stoopid")
             return
 
-        print(withdraw_from_bank(user_id, withdraw_amount))
-
         await context.reply("You have succesfully withdrawn 💰**" + str(withdraw_amount) + "**!")
-
 
 
     @commands.command(name="coolpersongib", hidden=True)
@@ -145,6 +142,10 @@ class ClassName(commands.Cog):
     @commands.command(name="sell")
     async def sell(self, context, item_id: str, number='1'):
 
+        if not get_an_item(item_id):
+            await context.reply(f"`{item_id}` doesn't exist dumb dumb. Smh, what are you thinking :rolling_eyes:")
+            return
+
         user_id = context.author.id
 
         if number == "all":
@@ -153,16 +154,41 @@ class ClassName(commands.Cog):
 
         int(number)
 
+
         item = get_an_item(item_id)
         if get_item_from_inventory(user_id, item_id) == -3:
             await context.reply("You don't have that item, you doofus")
             return
+
         else:
-            money_earned = item["sell_price"] * number
+            money_earned = int(item["sell_price"]) * int(number)
             remove_from_inventory(user_id, item_id, number)
             add_wallet_bal(user_id, money_earned)
             await context.reply(f"You sucessfully sold {number} {item_id} for 💰**{money_earned}**")
 
+    @commands.command(name="buy")
+    async def buy(self, context, *item_id, number=1):
+
+        item_id = " ".join(item_id)
+
+        user_id = context.author.id
+        item = get_an_item(item_id)
+        # if item is non existent
+        if not get_an_item(item_id):
+            await context.send(f"`{item_id}` isn't even in the shop doofus")
+            return
+        if not item.get("buyable"):
+            await context.send(f"`{item_id}` isn't even in the shop doofus")
+            return
+        if int(get_wallet_bal(user_id)) < int(item.get("buy_price"))*number:
+            await context.send(f"You can't afford this item you dumb dumb")
+            return
+        emoji = item.get("emoji")
+        price = int(item.get("buy_price"))
+
+        await context.send(f"You bought {number} {item_id} {emoji}")
+        add_to_inventory(user_id, item_id, num=number)
+        sub_wallet_bal(user_id, price*number)
 
 # set it up
 def setup(client):

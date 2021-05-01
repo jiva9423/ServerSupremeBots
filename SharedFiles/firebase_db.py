@@ -1,6 +1,7 @@
 import pyrebase
 import time
 import SharedFiles.fb_tokens as fb_tokens
+import random
 
 config = fb_tokens.get_config()
 email = fb_tokens.get_email()
@@ -228,9 +229,11 @@ def add_wallet_bal(user_id, val):
     if not user_exists(user_id):
         return -1
 
+    int(val)
+
     #new_bal = db.child("users").child(user_id).child("wallet_bal").get(user['idToken'])
-    new_bal = all_data["users"][user_id]["wallet_bal"]
-    new_bal = int(new_bal) + val
+    new_bal = int(all_data["users"][user_id]["wallet_bal"])
+    new_bal += int(val)
 
     if new_bal <= 0:
         new_bal = 0
@@ -695,12 +698,12 @@ def add_to_inventory(user_id, item_id, num=1):
 # return -5 if user is trying to remove more of the item than they have
 def remove_from_inventory(user_id, item_id, num=1):
     global all_data
+    num = int(num)
     refresh_token()
     user_id = str(user_id)
     item_id = str(item_id).lower()
     if not user_exists(user_id):
         return -1
-
     if num < 0:
         return -2
 
@@ -784,14 +787,18 @@ def get_rarest_item(max_rarity: int, *item_types):
         item_list = list(items_dict.keys())
         all_items += item_list
 
+    items_under_rarity = []
+
     for item_id in all_items:
         item = get_an_item(item_id)
         item_rarity = int(item.get("item_rarity"))
 
         # if the item is the rarest so far and under the random limit for rarity, then set as the item
-        if greatest_rarity < item_rarity < max_rarity:
-            greatest_rarity = item_rarity
-            chosen_item = item
+        if greatest_rarity < item_rarity < max_rarity + 1:
+            items_under_rarity.append(item_id)
+
+    chosen_item = get_an_item(random.choice(items_under_rarity))
+
     return chosen_item
 
 

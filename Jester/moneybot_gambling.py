@@ -5,7 +5,6 @@ import random
 import asyncio
 from SharedFiles.firebase_db import add_wallet_bal, sub_wallet_bal, get_wallet_bal
 
-coin_images = ['https://imgur.com/qTOevzI', 'https://imgur.com/VW30zVh', 'https://imgur.com/ybM3uDY', 'https://imgur.com/zUrl17g', 'https://imgur.com/sQbcFl4', 'https://imgur.com/20vY6HE', 'https://imgur.com/JdTz4mq', 'https://imgur.com/oMkRmV2']
 # create a class with what ever name you want.
 
 
@@ -58,6 +57,8 @@ class ClassName(commands.Cog):
         rand_side = random.choice([heads, tails])
         user_id = context.author.id
 
+        await asyncio.sleep(2)
+
         # loss
         if side.content.lower() not in rand_side:
             desc = f"**You lose**\n The coin landed on **{rand_side[0]}** and you chose **{side.content}**\n Better luck next time! You lost **💰{str(amount)}**"
@@ -72,6 +73,7 @@ class ClassName(commands.Cog):
             win_embed.set_author(name=f"{context.author.display_name}'s Cointoss", icon_url=context.author.avatar_url)
             await context.reply(embed=win_embed)
             add_wallet_bal(user_id, amount)
+
 
 # set it up
 def setup(client):
