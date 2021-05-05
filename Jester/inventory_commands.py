@@ -21,7 +21,7 @@ class Inventory(commands.Cog):
         if not str(page_number).isnumeric():
             page_number = 1
 
-        starting_index = 5 * (int(page_number)-1) # starting item for page
+        starting_index = 5 * (int(page_number)-1)# starting item for page
         inv_keys = list(inv.keys())
         if len(inv) == 0:
             await context.send("You don't have anything in your inventory")
@@ -36,17 +36,12 @@ class Inventory(commands.Cog):
         for i in range(starting_index, starting_index+5):
             if i >= len(inv):
                 break
-            types = ""
             item = firebase_db.get_an_item(inv_keys[i])
-            item_types = item.get("item_types")
+            item_type = item.get("item_type")
 
-            if item_types is None:
-                item_types = []
 
-            for t in item_types:
-                types += str(t) + " "
             description += str(item.get("emoji")) + " **" + str(item.get("item_name")) + "** ─ " + str(inv.get(inv_keys[i])) + "\n"
-            description += "ID `" + str(inv_keys[i]) + "` ─ " + types + "\n\n"
+            description += "ID `" + str(inv_keys[i]) + "` ─ " + item_type.capitalize() + "\n\n"
 
         my_embed = discord.Embed(title=str(context.author.name) + "'s Inventory", description=description, color=discord.Color.blue())
         my_embed.set_footer(text="Page " + str(page_number) + " of " + str(max_pages))

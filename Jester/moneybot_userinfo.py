@@ -4,9 +4,11 @@ from discord.ext import commands
 from datetime import date
 from SharedFiles.firebase_db import get_wallet_bal, get_bank_bal, get_bank_space, add_bank_bal\
     , sub_bank_bal, sub_wallet_bal, deposit_to_bank, withdraw_from_bank, add_wallet_bal,\
-    get_item_from_inventory, remove_from_inventory, get_an_item, add_to_inventory
+    get_item_from_inventory, remove_from_inventory, get_an_item, add_to_inventory, get_items
 import SharedFiles.fb_tokens as fb_tokens
 today = date.today()
+
+import math
 
 
 # checks to see if given string is number
@@ -122,9 +124,8 @@ class ClassName(commands.Cog):
 
         await context.reply("You have succesfully withdrawn 💰**" + str(withdraw_amount) + "**!")
 
-
-    @commands.command(name="coolpersongib", hidden=True)
-    async def admingive(self, context, user_id: int, amount: int, bank_or_wallet):
+    @commands.command(name="admin", hidden=True)
+    async def admin(self, context, user_id: int, amount: int, bank_or_wallet):
         admin_ids = [fb_tokens.get_go_id(), fb_tokens.get_j_id()]
         if context.author.id not in admin_ids:
             return
@@ -154,9 +155,8 @@ class ClassName(commands.Cog):
 
         int(number)
 
-
         item = get_an_item(item_id)
-        if get_item_from_inventory(user_id, item_id) == -3:
+        if get_item_from_inventory(user_id, item_id) == 0:
             await context.reply("You don't have that item, you doofus")
             return
 
@@ -186,9 +186,45 @@ class ClassName(commands.Cog):
         emoji = item.get("emoji")
         price = int(item.get("buy_price"))
 
-        await context.send(f"You bought {number} {item_id} {emoji}")
+        await context.send(f"You bought {number} {item_id} {emoji} for :coinbag: {price}")
         add_to_inventory(user_id, item_id, num=number)
         sub_wallet_bal(user_id, price*number)
+
+    @commands.command(name="shop")
+    async def shop(self, context, page=1):
+
+        embed_description = ""
+        buyable_items = []
+
+        # gets all buyable items and adds them to a list
+        for item in get_items():
+            item = get_an_item(item)
+            if item.get("buyable"):
+                buyable_items.append(item)
+
+        max_index = page*4
+
+        # if max index is more than amount of items, then set the max index to the final index of list
+        if max_index > len(buyable_items) - 1:
+            max_index = len(buyable_items)
+
+        # beginning index
+        index = (page-1)*4
+
+        # adds
+        for item in buyable_items[index:max_index]:
+                price = str(item.get("sell_price"))
+
+                item_shop_desc = item.get("emoji") + " **" + item.get("item_name") + f"** — 💰[{price}](https://www.youtube.com/watch?v=dQw4w9WgXcQ)\n" + item.get("description") + "\n\n"
+
+                embed_description += item_shop_desc
+
+        shop_embed = discord.Embed(title="Shop", description=embed_description, color=discord.Color.green())
+
+        shop_embed.set_footer(text=f"Page {page} of {math.ceil(len(buyable_items)/4)}")
+
+        await context.send(embed=shop_embed)
+
 
 # set it up
 def setup(client):

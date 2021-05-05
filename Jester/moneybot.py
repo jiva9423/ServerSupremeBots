@@ -12,6 +12,9 @@ cooldown_titles = ["Chillax my guy", "What's the hurry?", "Take a chill pill", "
 
 beg_description = ["Slow down on the begging you lowly BEGGAR", "Don't spam da beg"]
 
+hunt_description = ["Looks like there aren't any animals in the forest right now", "You scared away all the animals smh", "The animals are trying to sleep now smh"]
+
+fish_description = ["The fish aren't hungry right now", "Fishing is all about patience", "Looks like there aren't any fish right now."]
 
 client = commands.Bot(command_prefix="!", case_insensitive=True)
 
@@ -46,9 +49,14 @@ async def on_command_error(ctx, exc):
 
         if command_invoked == "beg":
             command_desc = random.choice(beg_description) + ". You can get\n more coins in"
+        elif command_invoked == "hunt":
+            command_desc = random.choice(hunt_description) + ".\n You can go hunting again in"
+        elif command_invoked == "fish":
+            command_desc = random.choice(fish_description) + ".\n You can go fishing again in"
+        else:
+            command_desc = f"{command_invoked} command is currently on cooldown, you can \n use it again in"
 
         time_embed = discord.Embed(title=random.choice(cooldown_titles), description=f"{command_desc} **{exc.retry_after:,.0f} seconds** \n *The default cooldown is `{exc.cooldown.per:,.0f}` seconds but you can\n lower it by leveling up!*", color=discord.Color.dark_blue())
-        #time_embed.add_field(name="Time left", value=f"`{exc.retry_after:,.1f}` seconds")
 
         await ctx.send(embed=time_embed)
 

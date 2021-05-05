@@ -594,7 +594,7 @@ def level_up(user_id):
 
     # increase max_xp user needs to get
     max_xp = get_max_xp(user_id)
-    set_max_xp(user_id, int(max_xp * 1.25))
+    set_max_xp(user_id, int(max_xp * 1.6))
     set_xp(user_id, 0)
 
     # increase bank bal
@@ -791,13 +791,18 @@ def get_rarest_item(max_rarity: int, *item_types):
 
     for item_id in all_items:
         item = get_an_item(item_id)
+        if not item:
+            continue
         item_rarity = int(item.get("item_rarity"))
 
         # if the item is the rarest so far and under the random limit for rarity, then set as the item
         if greatest_rarity < item_rarity < max_rarity + 1:
             items_under_rarity.append(item_id)
+    rand_item = random.choice(items_under_rarity)
+    chosen_item = get_an_item(rand_item)
 
-    chosen_item = get_an_item(random.choice(items_under_rarity))
+    if not chosen_item:
+        return 0
 
     return chosen_item
 

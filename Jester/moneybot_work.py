@@ -69,9 +69,9 @@ class ClassName(commands.Cog):
 
         # counts as a successful hunt
         if rand < 80:
-
+            rarity = random.randint(1, 100)
             # get the rarest item from type "hunting" that is under the random chance
-            hunted = get_rarest_item(rand, "hunting")
+            hunted = get_rarest_item(rarity, "hunting")
 
             response = random.choice(hunt_responses)
 
@@ -97,9 +97,9 @@ class ClassName(commands.Cog):
 
         # counts as a successful hunt
         if rand < 80:
-
+            rarity = random.randint(1, 100)
             # get the rarest item from type "hunting" that is under the random chance
-            fished = get_rarest_item(rand, "fishing")
+            fished = get_rarest_item(rarity, "fishing")
 
             response = random.choice(fish_responses)
 
@@ -109,6 +109,41 @@ class ClassName(commands.Cog):
 
         else:
             response = random.choice(no_fish_responses)
+            await context.send(response)
+            return
+
+    @commands.command(name="dig")
+    async def dig(self, context):
+        user_id = context.author.id
+
+        if get_item_from_inventory(user_id, "pick") == 0:
+            await context.reply("You're going to need a pick if you want to dig, pea brain")
+            return
+
+        rand = random.randint(1, 100)
+
+        # counts as a successful dig
+        if rand > 50:
+            if rand > 70:
+                random_item_chance = random.randint(0, 100)
+                # get a random item from designated types and that is under a random chance
+                dug_item = get_rarest_item(random_item_chance, "tool", "mineral")
+                item_dig_desc = "and " + dug_item.get("item_name") + " " +dug_item.get("emoji")
+
+            money_dug = rand*7 + random.randint(1, 100)
+
+            desc = "**" + str(money_dug) + "** :moneybag: "
+
+            if 'item_dig_desc' in locals():
+                desc += item_dig_desc
+
+            await context.send(f"Wow, you dug up " + desc + ". You lucky duck!")
+
+            add_to_inventory(user_id, dug_item.get("item_id"))
+            add_wallet_bal(user_id, money_dug)
+
+        else:
+            response = "Oop, you got nothing. Unlucky :p"
             await context.send(response)
             return
 
