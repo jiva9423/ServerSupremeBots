@@ -4,6 +4,8 @@ from discord.ext.commands import CommandOnCooldown, MissingRequiredArgument, Cha
 import random
 import SharedFiles.fb_tokens as fb_tokens
 import SharedFiles.firebase_db as firebase
+from SharedFiles.firebase_db import get_level
+from SharedFiles.firebase_db import create_user
 import asyncio
 
 users_on_cooldown = []
@@ -47,6 +49,10 @@ async def on_command_error(ctx, exc):
 
     if isinstance(exc, CommandOnCooldown):
 
+        level = get_level(ctx.author.id)
+
+        exc.retry_after = exc.retry_after * (1-.01*level)
+
         if command_invoked == "beg":
             command_desc = random.choice(beg_description) + ". You can get\n more coins in"
         elif command_invoked == "hunt":
@@ -54,9 +60,9 @@ async def on_command_error(ctx, exc):
         elif command_invoked == "fish":
             command_desc = random.choice(fish_description) + ".\n You can go fishing again in"
         else:
-            command_desc = f"{command_invoked} command is currently on cooldown, you can \n use it again in"
+            command_desc = f"the `{command_invoked}` command is currently on cooldown, you can \n use it again in"
 
-        time_embed = discord.Embed(title=random.choice(cooldown_titles), description=f"{command_desc} **{exc.retry_after:,.0f} seconds** \n *The default cooldown is `{exc.cooldown.per:,.0f}` seconds but you can\n lower it by leveling up!*", color=discord.Color.dark_blue())
+        time_embed = discord.Embed(title=random.choice(cooldown_titles), description=f"{command_desc} **{exc.retry_after:,.0f} seconds** \n *The default cooldown is `{exc.cooldown.per:,.0f}` seconds but you can\n lower it by 1% for each level!*\n**Your Level:{level}**", color=discord.Color.dark_blue())
 
         await ctx.send(embed=time_embed)
 
@@ -77,6 +83,13 @@ async def on_message(message):
     if message.author == client.user:
         return
 
+@client.command(name="adduser")
+async def user(context, user_id: int):
+    if context.author.id != 719989279505252414:
+        print("not admin")
+        return
+    create_user(user_id, context.author.id)
+    await context.send("User created!")
 
 client.run(fb_tokens.get_d_token())
 

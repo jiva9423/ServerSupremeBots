@@ -123,6 +123,7 @@ class ClassName(commands.Cog):
             return
 
         await context.reply("You have succesfully withdrawn 💰**" + str(withdraw_amount) + "**!")
+        withdraw_from_bank(user_id, withdraw_amount)
 
     @commands.command(name="admin", hidden=True)
     async def admin(self, context, user_id: int, amount: int, bank_or_wallet):

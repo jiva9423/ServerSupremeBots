@@ -70,7 +70,6 @@ async def on_command_error(ctx, exc):
 
 
 
-
 @client.command(name="embed")
 async def embed(context, channel: discord.TextChannel):
     main_embed = await verification.create_verification_embed(context, channel)

@@ -1,6 +1,7 @@
 # create method to be used in another file
 import discord
 from discord.ext import commands
+from discord.ext.commands import BucketType
 import random
 import asyncio
 from SharedFiles.firebase_db import add_wallet_bal, sub_wallet_bal, get_wallet_bal
@@ -19,6 +20,7 @@ class ClassName(commands.Cog):
     # Use @commands instead of @client
     # For events; @commands.Cog.listener()
     @commands.command(name="cointoss", aliases=["cf", "flip", "toss", "coinflip"])
+    @commands.cooldown(1, 20, BucketType.user)
     async def cointoss(self, context, amount):
 
         def check(msg):
