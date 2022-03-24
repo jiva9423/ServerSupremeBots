@@ -1,5 +1,5 @@
 # ServerSupremeBots
-# Below are some commands.
+# Below are some of the bot commands
 ![alt text](https://github.com/jiva9423/ServerSupremeBots/blob/master/db2.png)
 ![alt text](https://github.com/jiva9423/ServerSupremeBots/blob/master/db5.png)
 ![alt text](https://github.com/jiva9423/ServerSupremeBots/blob/master/db6.png)
